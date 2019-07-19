@@ -50,20 +50,18 @@ while EM_try <= total_EM_tries,
 %     Betak =solution.param.Betak;
 %     Sigmak =sqrt(solution.param.Sigmak);
 %     Sigma2k = Sigmak.^2;
-
 %     Deltak = solution.Deltak;
 %     Lambdak = solution.param.Lambdak;
 
     % 2. Intitialization of the skewness parameter
- 
-    Deltak = -.9 + 1.8*rand(1,K); % tone : -.9 + .9*rand(1,K); and 5 rand for Nuk, zeros alpha and non symetri
-    Lambdak = Deltak./sqrt(1-Deltak.^2);
+    Lambdak = -.1 + .2*rand(1,K); % tone : -.9 + .9*rand(1,K); and 5 rand for Nuk, zeros alpha and non symetri
+    Deltak  =  Lambdak./(1 + Lambdak.^2);
     
     % 3. Intitialization of the degrees of freedm
     Nuk = 1 + 5*rand(1,K);
     
     % intial value for STMoE density
-    [STMoE, tmp] = univ_STMoE_pdf(y, Alphak, Betak, sqrt(Sigma2k), Lambdak, Nuk, XBeta, XAlpha) ; 
+    [STMoE, ~] = univ_STMoE_pdf(y, Alphak, Betak, sqrt(Sigma2k), Lambdak, Nuk, XBeta, XAlpha) ; 
     
     %%%
     iter = 0;
@@ -93,66 +91,28 @@ while EM_try <= total_EM_tries,
             Dik(:,k) = (y - muk)/sigmak;
             
             Mik(:,k) = Lambdak(k)*Dik(:,k).*sqrt((Nuk(k) + 1)./(Nuk(k) + Dik(:,k).^2));
-            
-%             A = tcdf(Mik(:,k)*sqrt((Nuk(k) + 3)/(Nuk(k) + 1)), Nuk(k) + 3);
-%             B = tcdf(Mik(:,k), Nuk(k) + 1);
+           
 
-%  xsq = (Mik(:,k)*sqrt((Nuk(k) + 3)/(Nuk(k) + 1))).^2;
-% v= Nuk(k) + 3;
-
-% min(xsq./(v + xsq))
-% %    
-%  %Nuk
-%  subplot(211),plot(A)
-%  subplot(212),plot(B)
-% subplot(313),plot(Mik(:,k))
-% Nuk
-% pause
-
-% plot(xsq)
-% pause
             % E[Wi|yi,zik=1]
+%             Wik(:,k) = ((Nuk(k) + 1)./(Nuk(k) + Dik(:,k).^2)).*...
+%                 tcdf(Mik(:,k)*sqrt((Nuk(k) + 3)/(Nuk(k) + 1)), Nuk(k) + 3)./tcdf(Mik(:,k), Nuk(k) + 1);
             Wik(:,k) = ((Nuk(k) + 1)./(Nuk(k) + Dik(:,k).^2)).*...
-                tcdf(Mik(:,k)*sqrt((Nuk(k) + 3)/(Nuk(k) + 1)), Nuk(k) + 3)./tcdf(Mik(:,k), Nuk(k) + 1);
-% Wik(:,k) = abs(Wik(:,k));
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                tcdf(Mik(:,k)*sqrt(1 + (2/(Nuk(k) + 1))), Nuk(k) + 3)./tcdf(Mik(:,k), Nuk(k) + 1);
+            
             % E[Wi Ui |yi,zik=1]
             deltak = Deltak(k);
             
             E1ik(:,k) = deltak * abs(y - muk).*Wik(:,k) + ...
                 (sqrt(1 - deltak^2)./(pi * STMoE)).*...
                 ((Dik(:,k).^2/(Nuk(k)*(1 - deltak^2)) + 1).^(-(Nuk(k)/2 + 1)));
-%  E1ik(:,k) = abs( E1ik(:,k));
+
             % E[Wi Ui^2|yi,zik=1]
             E2ik(:,k) = deltak^2 * ((y - muk).^2).*Wik(:,k) + (1 - deltak^2)*sigmak^2 + ...
                 ((deltak * (y - muk) * sqrt(1 - deltak^2))./(pi * STMoE)).*...
                 (((Dik(:,k).^2)./(Nuk(k)*(1 - deltak^2)) + 1).^(-(Nuk(k)/2 + 1)));              
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% %     Wik = abs(Wik);
-%     %E1ik = abs(E1ik);
-% %     E2ik = abs(E2ik); 
-%             %alternative representation
-%             % E[Ui|yi,zik=1] and E[Ui^2|yi,zik=1]
-%             mu_uk = (Deltak(k)* (y - XBeta*Betak(:,k)));
-%             sigma2_uk = (1-Deltak(k)^2)*Sigma2k(k);
-%             sigma_uk = sqrt(sigma2_uk);
-%             % E[Wi Ui |yi,zik=1] and E[Wi Ui^2|yi,zik=1]
-%             TMP = (1./(pi * STMoE)).*(((Dik(:,k).^2)./(Nuk(k)*(1 - Deltak(k)^2)) + 1).^(-(Nuk(k)/2 + 1)));
-%             % E[Wi Ui |yi,zik=1]
-%             E1ik(:,k) = mu_uk.*Wik(:,k) + (sigma_uk/sigmak).* TMP;
-%             % E[Wi Ui^2|yi,zik=1]
-%             E2ik(:,k) = mu_uk.^2.*Wik(:,k) + sigma2_uk + mu_uk*(sigma_uk/sigmak).*TMP;
-%  %  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
               
             % E[log(Wi)|yi,zik=1]
-            % numerical integral computation
-%             gtx = @(h) (psi((nuk+2)+2) -  psi((nuk+1)+2) - log(1+ (h.^2/(nuk+1))) + ((nuk+1)*h.^2 - nuk - 1)./((nuk+1)*(nuk+1+h.^2)))...
-%                 .*tpdf(h, nuk + 1);
-%             Integgtx = zeros(n,1);
-%             for i=1:n
-%                 Integgtx(i) = quad(gtx,-100,mik(i));
-%             end
+            % OLS method
             Integgtx = 0;
             
             E3ik(:,k) = Wik(:,k) - log((Nuk(k) + Dik(:,k).^2)/2) -(Nuk(k) + 1)./(Nuk(k) + Dik(:,k).^2) + psi((Nuk(k) + 1)/2)...
@@ -164,16 +124,21 @@ while EM_try <= total_EM_tries,
             piik_fik(:,k) = Piik(:,k).*(2/sigmak).*tpdf(Dik(:,k), Nuk(k)).*tcdf(Mik(:,k), Nuk(k) + 1);
         end
         
+%         STMoE = sum(piik_fik,2);% skew-t mixture of experts density
+%         log_piik_fik = log(piik_fik);
+%         log_sum_piik_fik = log(sum(piik_fik,2));
+%         %E[Zi=k|yi]
+%         Tauik = piik_fik./(STMoE*ones(1,K));%(sum(piik_fik,2)*ones(1,K));
+
         STMoE = sum(piik_fik,2);% skew-t mixture of experts density
         log_piik_fik = log(piik_fik);
-        log_sum_piik_fik = log(sum(piik_fik,2));
-        
-        %E[Zi=k|yi]
-        Tauik = piik_fik./(STMoE*ones(1,K));%(sum(piik_fik,2)*ones(1,K));
-        
-%             figure
-%      plot(Tauik)
-% pause     
+        log_sum_piik_fik = logsumexp(log_piik_fik, 2);
+%         %E[Zi=k|yi]
+        log_Tauik = log_piik_fik - log_sum_piik_fik*ones(1,K);
+        Tauik = exp(log_Tauik);
+        %Tauik = exp(log_Tauik)./(sum(exp(log_Tauik),2)*ones(1,K));
+        %loglik = sum(log_sum_piik_fik);
+
         %% M-Step
         % updates of alphak, betak's, sigma2k's and lambdak's
         % --------------------------------------------------%
@@ -182,7 +147,7 @@ while EM_try <= total_EM_tries,
         res = IRLS(XAlpha, Tauik, Alphak,verbose_IRLS);
         %Piik = res.piik;
         Alphak = res.W;
-        for k=1:K,
+        for k=1:K
             %% CM-Step 1:
             % update the regression coefficients
 %             XBetak = XBeta.*(sqrt(Tauik(:,k).*Wik(:,k))*ones(1,p+1));%[m*(p+1)]
@@ -193,8 +158,7 @@ while EM_try <= total_EM_tries,
             TauikWik = (Tauik(:,k).*Wik(:,k))*ones(1,p+1);
             TauikX = XBeta.*(Tauik(:,k)*ones(1,p+1));
             betak =((TauikWik.*XBeta)'*XBeta)\(TauikX'*(Wik(:,k).*y - Deltak(k)*E1ik(:,k)));
-
-            
+           
 %             TauikX = XBeta.*(sqrt(Tauik(:,k)*ones(1,p+1))); 
 %             WikX = XBeta.*(sqrt(Wik(:,k))*ones(1,p+1));%[m*(p+1)]            
 %             betak = TauikX'*WikX\(TauikX'*(Wik(:,k).*y - Deltak(k)*E1ik(:,k)));
@@ -204,32 +168,28 @@ while EM_try <= total_EM_tries,
             Sigma2k(k)= sum(Tauik(:,k).*(Wik(:,k).*((y-XBeta*betak).^2) - 2*Deltak(k)*E1ik(:,k).*(y-XBeta*betak)...
                 + E2ik(:,k)))/(2*(1-Deltak(k)^2)*sum(Tauik(:,k)));
             
-            %Sigma2k(k)=.1;
             %% CM-Step 2: update the deltak (the skewness parameter)
             delta0 = Deltak(k);
-%             e1ik = abs(E1ik(:,k));
-%             e2ik = (E2ik(:,k));
             %
             sigmak = sqrt(Sigma2k(k));
             Dik(:,k) = (y - XBeta*Betak(:,k))/sigmak;
-            
-            Deltak(k) = fzero(@(delta) delta*(1-delta^2)*sum(Tauik(:,k)) ...
-                + (1+ delta^2)*sum(Tauik(:,k).*Dik(:,k).*E1ik(:,k)/sigmak) ...
-                - delta* sum(Tauik(:,k).*(Wik(:,k).*(Dik(:,k).^2) + E2ik(:,k)/(sigmak^2))),[-1, 1]);%[-1, 1]
-%  Deltak(k)= .01; 
+
+            Lambdak(k) = fzero(@(lmbda) (lmbda/sqrt(1+lmbda^2))*(1-(lmbda^2/(1+lmbda^2)))*sum(Tauik(:,k)) ...
+                + (1+ (lmbda^2/(1+lmbda^2)))*sum(Tauik(:,k).*Dik(:,k).*E1ik(:,k)/sigmak) ...
+                - (lmbda/sqrt(1+lmbda^2))* sum(Tauik(:,k).*(Wik(:,k).*(Dik(:,k).^2) + E2ik(:,k)/(sigmak^2))), delta0);
    
-            Lambdak(k) = Deltak(k)/sqrt(1 - Deltak(k)^2);
             %% CM-Step 4: update the nuk (the robustness parameter)
             
             nu0 = Nuk(k);
             %solution below works
-%             Nuk(k) = fzero(@(nu) - psi((nu)/2) + log((nu)/2) + 1 + sum(Tauik(:,k).*(E3ik(:,k) - Wik(:,k)))/sum(Tauik(:,k)), [.1, 200], 1e-6);%nu0);%
+            Nuk(k) = fzero(@(nu) - psi((nu)/2) + log((nu)/2) + 1 + sum(Tauik(:,k).*(E3ik(:,k) - Wik(:,k)))/sum(Tauik(:,k)), nu0);
             
             % probably fzero has been updated in the recent matlab versions
-            Nuk(k) = fzero(@(nu) - psi((nu)/2) + log((nu)/2) + 1 + sum(Tauik(:,k).*(E3ik(:,k) - Wik(:,k)))/sum(Tauik(:,k)), [.1, 200]);%nu0);%
+%             Nuk(k) = fzero(@(nu) - psi((nu)/2) + log((nu)/2) + 1 + sum(Tauik(:,k).*(E3ik(:,k) - Wik(:,k)))/sum(Tauik(:,k)), [.1, 200]);%nu0);%
+            % update the deltakak (the skewness parameter)
+            Deltak = Lambdak./sqrt(1 + Lambdak.^2);
         end
         %%
-        
         % observed-data log-likelihood
         loglik = sum(log_sum_piik_fik) + res.reg_irls;% + regEM;
         
@@ -258,7 +218,7 @@ while EM_try <= total_EM_tries,
     solution.log_piik_fik = log_piik_fik;
     solution.ml = loglik;
     solution.stored_loglik = stored_loglik;
-    %% parameter vector of the estimated SNMoE model
+    %% parameter vector of the estimated STMoE model
     Psi = [param.Alphak(:); param.Betak(:); param.Sigmak(:); param.Lambdak(:); param.Nuk(:)];
     %
     solution.Psi = Psi;
