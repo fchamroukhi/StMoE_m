@@ -28,7 +28,7 @@
 % - F. Chamroukhi. Skew t mixture of experts. Neurocomputing - Elsevier, Vol. 266, pages:390-408, 2017
 % - F. Chamroukhi. Non-Normal Mixtures of Experts. arXiv:1506.06707, July, 2015
 %%
-% (c) By Faicel Chamroukhi Introduced and written by Faicel Chamroukhi (may 2015)
+% (c) Introduced and written by Faicel Chamroukhi (may 2015)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 clear all;
