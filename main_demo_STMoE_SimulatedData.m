@@ -35,7 +35,7 @@ clear all;
 close all;
 clc; 
 %%  sample drawn from the model:
-n = 300;
+n = 500;
 % some specified parameters for the model
 Alphak = [0, 8]';
 Betak = [0 0;
@@ -49,8 +49,9 @@ x = linspace(-1, 1, n);
 [y, klas, stats, Z] = sample_univ_STMoE(Alphak, Betak, Sigmak, Lambdak, Nuk, x);
 
 %% add (or no) outliers
-WithOutliers = 0; % to generate a sample with outliers
-%  outliers
+WithOutliers = 1; % to generate a sample with outliers
+
+% if outliers
 if WithOutliers
     rate = 0.05;%amount of outliers in the data
     No = round(length(y)*rate);

@@ -60,11 +60,11 @@ end
 
 % Intialise the softmax parameters
 Alphak = zeros(q+1,K-1);
-% Z = zeros(n,K);
-% Z(klas*ones(1,K)==ones(n,1)*[1:K])=1;
-% Tau = Z;
-% res = IRLS(Xalpha, Tau, Alphak);
-% Alphak = res.W;
+Z = zeros(n,K);
+Z(klas*ones(1,K)==ones(n,1)*[1:K])=1;
+Tau = Z;
+res = IRLS(Xalpha, Tau, Alphak);
+Alphak = res.W;
 
 
 
