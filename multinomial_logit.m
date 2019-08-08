@@ -76,6 +76,7 @@ piik = expXW./(sum(expXW(:,1:K),2)*ones(1,K));
 % piik = normalize(expXW,2);
 if nargin>2    %calcul de la log-vraisemblance
     loglik = sum(sum((Y.*XW) - (Y.*log(sum(expXW,2)*ones(1,K))),2));
+%    loglik = sum(sum((Y.*XW) - Y.*(logsumexp(XW,2)*ones(1,K)),2));
     if isnan(loglik)
         % to avoid numerical overflow since exp(XW=-746)=0 and exp(XW=710)=inf)
         XW=X*W;
@@ -95,4 +96,5 @@ if nargin>2    %calcul de la log-vraisemblance
 else
     loglik = [];
 end
+% piik = normalize(piik + 1e-5,2);
 probs = piik;

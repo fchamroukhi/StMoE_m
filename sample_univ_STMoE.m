@@ -4,7 +4,7 @@ function [y, klas, stats, Z] = sample_univ_STMoE(Alphak, Betak, Sigmak, Lambdak,
 %
 %
 %
-% X : covariates
+% 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -61,10 +61,10 @@ end
 % % E[yi]
 % Ey = sum(Piik.*Ey_k,2);
 % % Var[yi|zi=k]
-% Vary_k = (Nuk./(Nuk-2) - (Deltak.^2).*(Xi_nuk.^2)).*(Sigmak.^2);
+% Vy_k = (Nuk./(Nuk-2) - (Deltak.^2).*(Xi_nuk.^2)).*(Sigmak.^2);
 %
 % % Var[yi]
-% Vary = sum(Piik.*(Ey_k.^2 + ones(n,1)*Vary_k),2) - Ey.^2;
+% Vy = sum(Piik.*(Ey_k.^2 + ones(n,1)*Vy_k),2) - Ey.^2;
 
 
 % Statistics (means, variances)
@@ -76,15 +76,15 @@ Ey_k = XBeta*Betak + ones(n,1)*(sigmak.*Deltak.*Xi_nuk);
 Ey = sum(Piik.*Ey_k,2);
 
 % Var[yi|zi=k]
-Vary_k = (Nuk./(Nuk-2) - (Deltak.^2).*(Xi_nuk.^2)).*(Sigmak.^2);
+Vy_k = (Nuk./(Nuk-2) - (Deltak.^2).*(Xi_nuk.^2)).*(Sigmak.^2);
 %ones(n,1)*((Nuk./(Nuk-2)).*(Sigmak.^2)) - Ey_k.^2;
 %(XBeta*Betak).^2 + 2*XBeta*Betak.*(ones(n,1)*(Deltak.*Sigmak.*Xi_nuk)) + ones(n,1)*((Nuk./(Nuk-2)).*(Sigmak.^2));
 
 % Var[yi]
-Vary = sum(Piik.*(Ey_k.^2 + ones(n,1)*Vary_k),2) - Ey.^2;
+Vy = sum(Piik.*(Ey_k.^2 + ones(n,1)*Vy_k),2) - Ey.^2;
 
 stats.Ey_k = Ey_k;
 stats.Ey = Ey;
-stats.Vary_k = Vary_k;
-stats.Vary = Vary;
+stats.Vy_k = Vy_k;
+stats.Vy = Vy;
 

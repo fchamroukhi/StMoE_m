@@ -36,16 +36,15 @@ if nargin ==4, n=1; end
 %     W = gamrnd(nu/2,2/nu, n, 1);% or by equivalance : chi2rnd(nu, n, 1)/nu;%
 %     U = normrnd(0,sqrt(sigma^2/W), n, 1);
 %     y  = normrnd(mu + delta * abs(U), sqrt((1-delta^2)*sigma^2./W));
-%% or by equivalance by using the stochastic representation of the
-% skew-t distribution :
-% a stanard skew-normal variable with parameter lambda
-E = sample_univ_SN(0, 1, lambda, n);
-% a gamma variable
-W = gamrnd(nu/2,2/nu); %chi2rnd(nu, n, 1)/nu;
-% a skew-t variable
-y = mu + sigma*E./sqrt(W);
+%% or by equivalance by using the stochastic representation of the skew-t distribution :
+% % a stanard skew-normal variable with parameter lambda
+% E = sample_univ_SN(0, 1, lambda, n);
+% % a gamma variable
+% W = gamrnd(nu/2,2/nu); %chi2rnd(nu, n, 1)/nu;
+% % a skew-t variable
+% y = mu + sigma*E./sqrt(W);
 %% another way :
-%     delta = lambda/sqrt(1+lambda^2);
-%     U = normrnd(0, sigma, n, 1).*sqrt(nu./(2*randg(nu/2, n, 1)));
-%     y = normrnd(mu + delta * abs(U), sqrt(1-delta^2)*sigma);
+    delta = lambda/sqrt(1+lambda^2);
+    U = normrnd(0, sigma, n, 1).*sqrt(nu./(2*randg(nu/2, n, 1)));
+    y = normrnd(mu + delta * abs(U), sqrt(1-delta^2)*sigma);
 end
